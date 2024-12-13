@@ -122,6 +122,16 @@ def load_data(file_path, max_size_mb=1, chunk_size=10000):
             logging.info(f"Data loaded in chunks with {len(data)} rows.")
         
         return data
+    except UnicodeDecodeError:
+        # If UTF-8 fails, try detecting the encoding
+        logging.warning("UTF-8 encoding failed. Trying to detect the correct encoding.")
+        with open(file_path, 'rb') as f:
+            result = chardet.detect(f.read())  # Detect encoding
+        encoding = result['encoding']
+        logging.info(f"Detected encoding: {encoding}")
+        data = pd.read_csv(file_path, encoding=encoding)
+        logging.info(f"Data loaded successfully with {len(data)} rows.")
+        return data
     except Exception as e:
         logging.error(f"Error loading file {file_path}: {e}")
         sys.exit(1)
@@ -251,6 +261,9 @@ def main():
 
     file_path = sys.argv[1]
     analyze_and_generate_output(file_path)
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
